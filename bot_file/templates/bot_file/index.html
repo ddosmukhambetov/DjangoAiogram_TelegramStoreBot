@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Домашняя страница</title>
+    <link rel="shortcut icon" type="image/x-icon" href="https://img.icons8.com/color/512/hearts.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        body {
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 50%;
+            margin: 0 auto;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            padding: 1rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        p {
+            margin-bottom: .5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Домашняя страница</h1>
+        <p><b>Инструкция к боту:</b></p>
+        <p>Это простая страница телеграмм бота, написанного на Django + Aiogram.</p>
+        <p>Через Django Admin можно добавлять и удалять категории и товары. Используется PostgreSql.</p>
+        <p>В самом телеграмм боте можно увидеть эти категории и сами товары.</p>
+        <p>Есть также команды, такие как "помощь", "описание", "каталог".</p>
+        <p><a href="http://localhost:8000/admin/">Нажмите на меня, чтобы перейти в Django Admin,
+            или, добавь в конец url-адреса: /admin/</a></p>
+    </div>
+</body>
+</html>

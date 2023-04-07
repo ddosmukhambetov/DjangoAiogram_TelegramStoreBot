@@ -1,11 +1,11 @@
 from aiogram import types
 from ..loader import bot, dp
 from ..keyboards.catalog_ikb import get_categories, category_cb
-from ..models import Product, Category
-from asgiref.sync import sync_to_async
+from ..models import Product
+from aiogram.dispatcher.filters import Text
 
 
-# @dp.message_handler(commands='catalog')
+# @dp.message_handler(Text(equals='Каталог 🛒'))
 async def cmd_catalog(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text="Выберите категорию из списка:",
                            reply_markup=await get_categories())
@@ -16,8 +16,9 @@ async def get_products(query):
     elem = query.data.split(':')
     async for product in Product.objects.filter(product_category_id=elem[1]):
         photo_id = product.photo.open('rb').read()
-        text = f"{product.name}\n{product.description}\n" \
-               f"{product.price}"
+        text = f"Товар 🚀: {product.name}\n\n" \
+               f"Описание 💬: {product.description}\n\n" \
+               f"Цена 💰: {product.price} рублей"
         await bot.send_photo(chat_id=query.message.chat.id, photo=photo_id, caption=text)
 
 
@@ -28,4 +29,4 @@ async def show_products(query: types.CallbackQuery):
 
 
 def catalog_handlers_register():
-    dp.register_message_handler(cmd_catalog, commands='catalog')
+    dp.register_message_handler(cmd_catalog, Text(equals='Каталог 🛒'))
