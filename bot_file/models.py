@@ -1,6 +1,23 @@
 from django.db import models
 
 
+class TelegramUser(models.Model):
+    chat_id = models.IntegerField(verbose_name='ID пользователя', unique=True, null=True)
+    user_login = models.CharField(verbose_name='Логин', max_length=255, unique=True)
+    user_password = models.CharField(verbose_name='Пароль', max_length=128)
+    is_registered = models.BooleanField(verbose_name='Зарегистрирован', default=False)
+    registered_at = models.DateTimeField(verbose_name='Время регистрации', auto_now_add=True)
+
+    def __str__(self):
+        return self.user_login
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        db_table = 'telegram_users'
+        ordering = ['-registered_at']
+
+
 class Product(models.Model):
     photo = models.ImageField(verbose_name='Фотография', upload_to='products/')
     name = models.CharField(verbose_name='Название', max_length=100)
@@ -34,4 +51,3 @@ class Category(models.Model):
         verbose_name_plural = 'Категории'
         db_table = 'categories'
         ordering = ['-created_at']
-
