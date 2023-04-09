@@ -1,2 +1,3 @@
-from bot_file.handlers.default import default_handlers_register
-from bot_file.handlers.catalog import catalog_handlers_register
+from .default import default_handlers_register
+from .catalog import catalog_handlers_register
+from .authorization import authorization_handlers_register
