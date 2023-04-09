@@ -1,8 +1,11 @@
 from aiogram import types
 from random import randrange
 from aiogram.dispatcher.filters import Text
+from django.conf import settings
+
 from ..loader import bot, dp
 from ..keyboards.default_kb import markup
+from ..models import TelegramUser
 
 HELP_TEXT = """
 Привет 👋, я бот по продаже различных товаров! У нас есть такие команды как:
@@ -10,6 +13,8 @@ HELP_TEXT = """
 <b>Помощь ⭐️</b> - помощь по командам бота
 <b>Описание 📌</> - адрес, контактные данные, график работы
 <b>Каталог 🛒</b> - список товаров которые можно купить
+
+Если вы хотите получать рассылку зарегистрируйтесь выбрав или написав команду <b>Регистрация ✌️</b>
 
 Рады что вы используете данного бота ❤️
 """
@@ -46,7 +51,19 @@ async def cmd_description(message: types.Message):
                             longitude=randrange(1, 100))
 
 
+# @dp.message_handler(Text(contains='Рассылка:'))
+async def send_all(message: types.Message):
+    if message.chat.id == settings.ADMIN_ID:
+        await message.answer(f"Сообщение <b>{message.text[message.text.find(' '):]}</b> отправляется")
+        async for user in TelegramUser.objects.filter(is_registered=True):
+            await bot.send_message(chat_id=user.chat_id, text=message.text[message.text.find(' '):])
+        await message.answer("Все успешно отправлено!")
+    else:
+        await message.answer("Вы не администратор, и вы не сможете отправлять рассылку!")
+
+
 def default_handlers_register():
     dp.register_message_handler(cmd_start, commands='start')
     dp.register_message_handler(cmd_help, Text(equals='Помощь ⭐️'))
     dp.register_message_handler(cmd_description, Text(equals='Описание 📌'))
+    dp.register_message_handler(send_all, Text(contains='Рассылка:'))
