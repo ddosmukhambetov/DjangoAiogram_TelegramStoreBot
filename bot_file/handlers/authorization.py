@@ -1,3 +1,5 @@
+import re
+
 from aiogram.dispatcher.filters import Text
 from asgiref.sync import sync_to_async
 from django.contrib.auth.hashers import make_password
@@ -9,13 +11,16 @@ from aiogram.dispatcher import FSMContext
 from ..models import TelegramUser
 from ..states import AuthState
 
+from ..keyboards.registration_kb import markup
+from ..keyboards import default_kb
+
 new_user = {}
 
 REGISTRATION_TEXT = """
 Для регистрации сначала напишите свой логин!
 
 Из чего должен состоять логин?
-    - Логин должен состоять только из <b>латинских букв</b> и <b>цифр</b>!
+    - Логин должен состоять только из <b>латинских букв</b>!
     - Длинна логина должна быть <b>больше 3 символов(букв и цифр)</b>
     - Логин должен быть <b>уникальным и не повторяющимися</b>
     
@@ -23,31 +28,58 @@ REGISTRATION_TEXT = """
 """
 
 
-@dp.message_handler(Text(equals='Регистрация ✌️'), state='*')
+# @dp.message_handler(Text(equals='Отмена ❌', ignore_case=True), state='*')
+async def command_cancel(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+    await state.finish()
+    await message.answer(text="Операция успешно отменена 🙅‍", reply_markup=default_kb.markup)
+
+
+# @dp.message_handler(Text(equals='Регистрация ✌️'), state='*')
 async def process_registration(message: types.Message):
-    await message.answer(REGISTRATION_TEXT)
+    await message.answer(REGISTRATION_TEXT, reply_markup=markup)
     await AuthState.user_login.set()
 
 
 # @dp.message_handler(state=AuthState.user_login)
 async def process_login(message: types.Message, state: FSMContext):
     login = message.text
-    if not await check_user(login):
-        async with state.proxy() as data:
-            data['login'] = login
-            new_user['user_login'] = data['login']
-        await message.answer("Теперь напиши пароль!")
-        await AuthState.user_password.set()
+    if not await check_users_chat_id(chat_id=message.chat.id):
+        if not await check_user(login=login):
+            if re.match('^[A-Za-z]+$', login) and len(login) > 3:
+                async with state.proxy() as data:
+                    data['login'] = login
+                    new_user['user_login'] = data['login']
+                await message.answer("Теперь напиши пароль ✍️")
+                await AuthState.user_password.set()
+            else:
+                await message.answer("Логин должен состоять только из <b>латинских букв 🔡</b>\n\n"
+                                     "Попробуйте еще раз ↩️!")
+                await AuthState.user_login.set()
+        else:
+            await message.answer("Пользователь с таким логином <b>уже есть</b>, попробуйте еще раз ↩️")
+            await AuthState.user_login.set()
     else:
-        await message.answer("Пользователь с таким логином уже есть, попробуйте еще раз!")
+        await message.answer("Пользователь с таким ID как у вас уже есть, войдите в свой аккаунт 🫡\n\n"
+                             "Если же вы не помните пароль нажмитие или напишите команду <b>Забыли пароль?</b>'",
+                             reply_markup=None)
 
 
 # @dp.message_handler(state=AuthState.user_password)
 async def process_password(message: types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['password'] = message.text
-    await message.answer("Введи пароль еще раз")
-    await AuthState.user_password_2.set()
+    if len(message.text) > 5 and re.match('^[a-zA-Z0-9]+$', message.text) and \
+            any(digit.isdigit() for digit in message.text):
+        async with state.proxy() as data:
+            data['password'] = message.text
+        await message.answer("Введи пароль <b>еще раз</b> 🔄")
+        await AuthState.user_password_2.set()
+    else:
+        await message.answer("Пароль должен быть только из <b>латинских букв</b> "
+                             "и содержать хотя бы <b>одну цифру</b>\n\n"
+                             "Повторите попытку 🔄")
+        await AuthState.user_password.set()
 
 
 # @dp.message_handler(state=AuthState.user_password_2)
@@ -61,9 +93,10 @@ async def process_password_2(message: types.Message, state: FSMContext):
 
             await save_user()
             await state.finish()
-            await message.answer("Регистрация прошла успешно!")
+            await message.answer("Регистрация прошла <b>успешно</b> ✅")
         else:
-            await message.answer("Вы ввели пароль не правильно!")
+            await message.answer("Вы ввели пароль <b>не правильно</b> ❌\n\n"
+                                 "Попробуйте еще раз 🔄")
             await AuthState.user_password.set()
 
 
@@ -81,7 +114,13 @@ def check_user(login):
     return TelegramUser.objects.filter(user_login=login).exists()
 
 
+@sync_to_async
+def check_users_chat_id(chat_id):
+    return TelegramUser.objects.filter(chat_id=chat_id).exists()
+
+
 def authorization_handlers_register():
+    dp.register_message_handler(command_cancel, Text(equals='Отмена ❌', ignore_case=True), state='*')
     dp.register_message_handler(process_registration, Text(equals='Регистрация ✌️'), state='*')
     dp.register_message_handler(process_login, state=AuthState.user_login)
     dp.register_message_handler(process_password, state=AuthState.user_password)
