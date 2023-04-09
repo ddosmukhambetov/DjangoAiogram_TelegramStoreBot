@@ -11,6 +11,7 @@ from aiogram.dispatcher import FSMContext
 from ..models import TelegramUser
 from ..states import AuthState
 
+from ..keyboards import sign_inup_kb
 from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
 
@@ -93,11 +94,18 @@ async def process_password_2(message: types.Message, state: FSMContext):
 
             await save_user()
             await state.finish()
-            await message.answer("Регистрация прошла <b>успешно</b> ✅")
+            await message.answer("Регистрация прошла <b>успешно</b> ✅\n\n"
+                                 "Теперь, войдите в свой профиль 💝",
+                                 reply_markup=sign_inup_kb.markup)
         else:
             await message.answer("Вы ввели пароль <b>не правильно</b> ❌\n\n"
                                  "Попробуйте еще раз 🔄")
             await AuthState.user_password.set()
+
+
+@dp.message_handler(Text(equals='Войти 👋'))
+async def command_sign_in(message: types.Message):
+    pass
 
 
 @sync_to_async
