@@ -7,13 +7,14 @@ from ..loader import dp
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from ..models import TelegramUser
-from ..states import AuthState, SignInState
+from ..states import AuthState, SignInState, ForgotPasswordState
 from ..keyboards import sign_inup_kb
 from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
 
 new_user = {}
 sign_in = {'current_state': False}
+update_data = {}
 
 REGISTRATION_TEXT = """
 Для регистрации сначала напишите свой логин!
@@ -51,14 +52,15 @@ async def process_login(message: types.Message, state: FSMContext):
                 async with state.proxy() as data:
                     data['login'] = login
                     new_user['user_login'] = data['login']
-                await message.answer("Теперь напиши пароль ✍️")
+                await message.answer("Теперь напиши пароль ✍️", reply_markup=markup)
                 await AuthState.user_password.set()
             else:
                 await message.answer("Логин должен состоять только из <b>латинских букв 🔡</b>\n\n"
-                                     "Попробуйте еще раз ↩️!")
+                                     "Попробуйте еще раз ↩️!", reply_markup=markup)
                 await AuthState.user_login.set()
         else:
-            await message.answer("Пользователь с таким логином <b>уже есть</b>, попробуйте еще раз ↩️")
+            await message.answer("Пользователь с таким логином <b>уже есть</b>, попробуйте еще раз ↩️",
+                                 reply_markup=markup)
             await AuthState.user_login.set()
     else:
         await message.answer("Пользователь с таким ID как у вас уже есть, войдите в свой аккаунт 🫡",
@@ -71,12 +73,12 @@ async def process_password(message: types.Message, state: FSMContext):
             any(digit.isdigit() for digit in message.text):
         async with state.proxy() as data:
             data['password'] = message.text
-        await message.answer("Введи пароль <b>еще раз</b> 🔄")
+        await message.answer("Введи пароль <b>еще раз</b> 🔄", reply_markup=markup)
         await AuthState.user_password_2.set()
     else:
         await message.answer("Пароль должен быть только из <b>латинских букв</b> "
                              "и содержать хотя бы <b>одну цифру</b>\n\n"
-                             "Повторите попытку 🔄")
+                             "Повторите попытку 🔄", reply_markup=markup)
         await AuthState.user_password.set()
 
 
@@ -94,7 +96,7 @@ async def process_password_2(message: types.Message, state: FSMContext):
                                  reply_markup=sign_inup_kb.markup)
         else:
             await message.answer("Вы ввели пароль <b>не правильно</b> ❌\n\n"
-                                 "Попробуйте еще раз 🔄")
+                                 "Попробуйте еще раз 🔄", reply_markup=markup)
             await AuthState.user_password.set()
 
 
@@ -110,10 +112,10 @@ async def process_sign_in(message: types.Message, state: FSMContext):
         async with state.proxy() as sign_in_data:
             sign_in_data['login'] = message.text
             sign_in['login'] = sign_in_data['login']
-        await message.answer("Теперь тебе нужно ввести пароль 🔐")
+        await message.answer("Теперь тебе нужно ввести пароль 🔐", reply_markup=markup)
         await SignInState.password.set()
     else:
-        await message.answer("Такого логина <b>нет</b>, повторите еще раз ❌")
+        await message.answer("Такого логина <b>нет</b>, повторите еще раз ❌", reply_markup=markup)
         await SignInState.login.set()
 
 
@@ -127,8 +129,66 @@ async def process_pass(message: types.Message, state: FSMContext):
             await message.answer("Вход был <b>успешно</b> выполнен ⭐️", reply_markup=default_kb.markup)
             await state.finish()
         else:
-            await message.answer("Пароль <b>не правильный</b> попробуйте еще раз 🔄")
+            await message.answer("Пароль <b>не правильный</b> попробуйте еще раз 🔄", reply_markup=markup)
             await SignInState.password.set()
+
+
+# @dp.message_handler(Text(equals='Забыли пароль? 🆘'))
+async def forgot_password(message: types.Message):
+    await message.answer("Чтобы изменить пароль, для начала введите логин 🫡", reply_markup=markup)
+    await ForgotPasswordState.user_login.set()
+
+
+# @dp.message_handler(state=ForgotPasswordState.user_login)
+async def process_forgot_password_login(message: types.Message, state: FSMContext):
+    if await check_login_chat_id(login=message.text, chat_id=message.chat.id):
+        await message.answer("Логин <b>успешно</b> найден, "
+                             "и ID пользователя совпадает с логином 🌟\n\n "
+                             "Теперь вы <b>сможете</b> изменить пароль ✅\n\n"
+                             "Введите <b>новый пароль</b> ✍️", reply_markup=markup)
+        update_data['user_login'] = message.text
+        await ForgotPasswordState.user_password.set()
+    else:
+        await message.answer("Вы <b>не прошли проверку</b> ❌\n\n"
+                             "На это могут быть две причины:\n"
+                             "1. Такого логина нет\n"
+                             "2. Ваш ID пользователя не совпадает с логином который вы указали\n\n"
+                             "Вы можете <b>повторить</b> попытку 🔄",
+                             reply_markup=sign_inup_kb.markup)
+        await state.finish()
+
+
+# @dp.message_handler(state=ForgotPasswordState.user_password)
+async def process_forgot_password_password(message: types.Message, state: FSMContext):
+    if len(message.text) > 5 and re.match('^[a-zA-Z0-9]+$', message.text) and \
+            any(digit.isdigit() for digit in message.text):
+        async with state.proxy() as forgot_password_data:
+            forgot_password_data['user_password'] = message.text
+            update_data['user_password'] = forgot_password_data['user_password']
+        await message.answer("Введи пароль <b>еще раз</b> 🔄", reply_markup=markup)
+        await ForgotPasswordState.user_password_2.set()
+    else:
+        await message.answer("Пароль должен быть только из <b>латинских букв</b> "
+                             "и содержать хотя бы <b>одну цифру</b>\n\n"
+                             "Повторите попытку 🔄", reply_markup=markup)
+        await ForgotPasswordState.user_password.set()
+
+
+# @dp.message_handler(state=ForgotPasswordState.user_password_2)
+async def process_forgot_password_password_2(message: types.Message, state: FSMContext):
+    async with state.proxy() as forgot_password_data:
+        forgot_password_data['user_password_2'] = message.text
+        update_data['user_password'] = forgot_password_data['user_password_2']
+        if forgot_password_data['user_password'] == forgot_password_data['user_password_2']:
+            await update_user_password(login=update_data['user_login'], password=update_data['user_password'])
+            await state.finish()
+            await message.answer("Изменение пароля прошла <b>успешно</b> ✅\n\n"
+                                 "Теперь, войдите в свой профиль 💝",
+                                 reply_markup=sign_inup_kb.markup)
+        else:
+            await message.answer("Вы ввели пароль <b>не правильно</b> ❌\n\n"
+                                 "Попробуйте еще раз 🔄", reply_markup=markup)
+            await ForgotPasswordState.user_password.set()
 
 
 @sync_to_async
@@ -137,6 +197,12 @@ def save_user():
                                        user_password=make_password(new_user['user_password']),
                                        is_registered=True,
                                        chat_id=new_user['chat_id'])
+    return user
+
+
+@sync_to_async
+def update_user_password(login, password):
+    user = TelegramUser.objects.filter(user_login=login).update(user_password=make_password(password))
     return user
 
 
@@ -155,6 +221,11 @@ def check_user(login):
 
 
 @sync_to_async
+def check_login_chat_id(login, chat_id):
+    return TelegramUser.objects.filter(user_login=login, chat_id=chat_id).exists()
+
+
+@sync_to_async
 def check_users_chat_id(chat_id):
     return TelegramUser.objects.filter(chat_id=chat_id).exists()
 
@@ -168,3 +239,7 @@ def authorization_handlers_register():
     dp.register_message_handler(command_sign_in, Text(equals='Войти 👋'))
     dp.register_message_handler(process_sign_in, state=SignInState.login)
     dp.register_message_handler(process_pass, state=SignInState.password)
+    dp.register_message_handler(forgot_password, Text(equals='Забыли пароль? 🆘'))
+    dp.register_message_handler(process_forgot_password_login, state=ForgotPasswordState.user_login)
+    dp.register_message_handler(process_forgot_password_password, state=ForgotPasswordState.user_password)
+    dp.register_message_handler(process_forgot_password_password_2, state=ForgotPasswordState.user_password_2)
