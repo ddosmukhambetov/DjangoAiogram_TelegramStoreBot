@@ -2,20 +2,21 @@ import re
 
 from aiogram.dispatcher.filters import Text
 from asgiref.sync import sync_to_async
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
-from ..loader import dp, bot
+from ..loader import dp
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 
 from ..models import TelegramUser
-from ..states import AuthState
+from ..states import AuthState, SignInState
 
 from ..keyboards import sign_inup_kb
 from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
 
 new_user = {}
+sign_in = False
 
 REGISTRATION_TEXT = """
 Для регистрации сначала напишите свой логин!
@@ -35,7 +36,7 @@ async def command_cancel(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     await state.finish()
-    await message.answer(text="Операция успешно отменена 🙅‍", reply_markup=default_kb.markup)
+    await message.answer(text="Операция успешно отменена 🙅‍", reply_markup=sign_inup_kb.markup)
 
 
 # @dp.message_handler(Text(equals='Регистрация ✌️'), state='*')
@@ -103,9 +104,34 @@ async def process_password_2(message: types.Message, state: FSMContext):
             await AuthState.user_password.set()
 
 
-@dp.message_handler(Text(equals='Войти 👋'))
+# @dp.message_handler(Text(equals='Войти 👋'))
 async def command_sign_in(message: types.Message):
-    pass
+    await message.answer("Введите свой логин ✨", reply_markup=markup)
+    await SignInState.login.set()
+
+
+# @dp.message_handler(state=SignInState.login)
+async def process_sign_in(message: types.Message, state: FSMContext):
+    if await check_user(message.text):
+        async with state.proxy() as sign_in_data:
+            sign_in_data['login'] = message.text
+        await message.answer("Теперь тебе нужно ввести пароль 🔐")
+        await SignInState.password.set()
+    else:
+        await message.answer("Такого логина <b>нет</b>, повторите еще раз ❌")
+        await SignInState.login.set()
+
+
+# @dp.message_handler(state=SignInState.password)
+async def process_pass(message: types.Message, state: FSMContext):
+    async with state.proxy() as sign_in_data:
+        sign_in_data['password'] = message.text
+        if await get_password(username=sign_in_data['login'], password=sign_in_data['password']):
+            await message.answer("Вход был <b>успешно</b> выполнен ⭐️", reply_markup=default_kb.markup)
+            await state.finish()
+        else:
+            await message.answer("Пароль <b>не правильный</b> попробуйте еще раз 🔄")
+            await SignInState.password.set()
 
 
 @sync_to_async
@@ -115,6 +141,15 @@ def save_user():
                                        is_registered=True,
                                        chat_id=new_user['chat_id'])
     return user
+
+
+@sync_to_async
+def get_password(username, password):
+    user = TelegramUser.objects.get(user_login=username)
+    if check_password(password, user.user_password):
+        return True
+    else:
+        return False
 
 
 @sync_to_async
@@ -133,3 +168,6 @@ def authorization_handlers_register():
     dp.register_message_handler(process_login, state=AuthState.user_login)
     dp.register_message_handler(process_password, state=AuthState.user_password)
     dp.register_message_handler(process_password_2, state=AuthState.user_password_2)
+    dp.register_message_handler(command_sign_in, Text(equals='Войти 👋'))
+    dp.register_message_handler(process_sign_in, state=SignInState.login)
+    dp.register_message_handler(process_pass, state=SignInState.password)
