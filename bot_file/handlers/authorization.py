@@ -65,8 +65,8 @@ async def process_login(message: types.Message, state: FSMContext):
             await AuthState.user_login.set()
     else:
         await message.answer("Пользователь с таким ID как у вас уже есть, войдите в свой аккаунт 🫡\n\n"
-                             "Если же вы не помните пароль нажмитие или напишите команду <b>Забыли пароль?</b>'",
-                             reply_markup=None)
+                             "Если же вы не помните пароль нажмитие или напишите команду <b>Забыли пароль?</b>",
+                             reply_markup=sign_inup_kb.markup)
 
 
 # @dp.message_handler(state=AuthState.user_password)
