@@ -16,7 +16,7 @@ from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
 
 new_user = {}
-sign_in = False
+sign_in = {}
 
 REGISTRATION_TEXT = """
 Для регистрации сначала напишите свой логин!
@@ -115,6 +115,7 @@ async def process_sign_in(message: types.Message, state: FSMContext):
     if await check_user(message.text):
         async with state.proxy() as sign_in_data:
             sign_in_data['login'] = message.text
+            sign_in['login'] = sign_in_data['login']
         await message.answer("Теперь тебе нужно ввести пароль 🔐")
         await SignInState.password.set()
     else:
@@ -126,7 +127,9 @@ async def process_sign_in(message: types.Message, state: FSMContext):
 async def process_pass(message: types.Message, state: FSMContext):
     async with state.proxy() as sign_in_data:
         sign_in_data['password'] = message.text
-        if await get_password(username=sign_in_data['login'], password=sign_in_data['password']):
+        sign_in['password'] = sign_in_data['password']
+        sign_in['current_state'] = True
+        if await get_password(username=sign_in['login'], password=sign_in['password']):
             await message.answer("Вход был <b>успешно</b> выполнен ⭐️", reply_markup=default_kb.markup)
             await state.finish()
         else:
