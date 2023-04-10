@@ -16,7 +16,7 @@ from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
 
 new_user = {}
-sign_in = {}
+sign_in = {'current_state': False}
 
 REGISTRATION_TEXT = """
 Для регистрации сначала напишите свой логин!
