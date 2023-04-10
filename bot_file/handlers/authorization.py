@@ -3,14 +3,11 @@ import re
 from aiogram.dispatcher.filters import Text
 from asgiref.sync import sync_to_async
 from django.contrib.auth.hashers import make_password, check_password
-
 from ..loader import dp
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-
 from ..models import TelegramUser
 from ..states import AuthState, SignInState
-
 from ..keyboards import sign_inup_kb
 from ..keyboards.registration_kb import markup
 from ..keyboards import default_kb
@@ -64,8 +61,7 @@ async def process_login(message: types.Message, state: FSMContext):
             await message.answer("Пользователь с таким логином <b>уже есть</b>, попробуйте еще раз ↩️")
             await AuthState.user_login.set()
     else:
-        await message.answer("Пользователь с таким ID как у вас уже есть, войдите в свой аккаунт 🫡\n\n"
-                             "Если же вы не помните пароль нажмитие или напишите команду <b>Забыли пароль?</b>",
+        await message.answer("Пользователь с таким ID как у вас уже есть, войдите в свой аккаунт 🫡",
                              reply_markup=sign_inup_kb.markup)
 
 
@@ -90,9 +86,7 @@ async def process_password_2(message: types.Message, state: FSMContext):
         data['password_2'] = message.text
         new_user['user_password'] = data['password_2']
         if data['password'] == data['password_2']:
-
             new_user['chat_id'] = message.chat.id
-
             await save_user()
             await state.finish()
             await message.answer("Регистрация прошла <b>успешно</b> ✅\n\n"
