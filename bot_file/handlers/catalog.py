@@ -1,14 +1,20 @@
 from aiogram import types
 from ..loader import bot, dp
 from ..keyboards.catalog_ikb import get_categories, category_cb
+from ..keyboards import sign_inup_kb
 from ..models import Product
 from aiogram.dispatcher.filters import Text
+from .authorization import sign_in
 
 
 # @dp.message_handler(Text(equals='Каталог 🛒'))
 async def cmd_catalog(message: types.Message):
-    await bot.send_message(chat_id=message.chat.id, text="Выберите категорию из списка:",
-                           reply_markup=await get_categories())
+    if sign_in['current_state']:
+        await bot.send_message(chat_id=message.chat.id, text="Выберите категорию из списка 📂",
+                               reply_markup=await get_categories())
+    else:
+        await message.answer("Вы не вошли в аккаунт, попробуйте войти в профиль ‼️",
+                             reply_markup=sign_inup_kb.markup)
 
 
 async def get_products(query):
