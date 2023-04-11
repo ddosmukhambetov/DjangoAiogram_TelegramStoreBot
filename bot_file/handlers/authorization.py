@@ -134,7 +134,7 @@ async def process_pass(message: types.Message, state: FSMContext):
             await SignInState.password.set()
 
 
-# @dp.message_handler(Text(equals='Забыли пароль? 🆘'))
+# @dp.message_handler(Text(equals='Забыли пароль? 🆘'), state='*')
 async def forgot_password(message: types.Message):
     await message.answer("Чтобы изменить пароль, для начала введите логин 🫡", reply_markup=markup)
     await ForgotPasswordState.user_login.set()
@@ -237,10 +237,10 @@ def authorization_handlers_register():
     dp.register_message_handler(process_login, state=AuthState.user_login)
     dp.register_message_handler(process_password, state=AuthState.user_password)
     dp.register_message_handler(process_password_2, state=AuthState.user_password_2)
-    dp.register_message_handler(command_sign_in, Text(equals='Войти 👋'))
-    dp.register_message_handler(process_sign_in, state=SignInState.login)
-    dp.register_message_handler(process_pass, state=SignInState.password)
-    dp.register_message_handler(forgot_password, Text(equals='Забыли пароль? 🆘'))
+    dp.register_message_handler(forgot_password, Text(equals='Забыли пароль? 🆘'), state='*')
     dp.register_message_handler(process_forgot_password_login, state=ForgotPasswordState.user_login)
     dp.register_message_handler(process_forgot_password_password, state=ForgotPasswordState.user_password)
     dp.register_message_handler(process_forgot_password_password_2, state=ForgotPasswordState.user_password_2)
+    dp.register_message_handler(command_sign_in, Text(equals='Войти 👋'))
+    dp.register_message_handler(process_sign_in, state=SignInState.login)
+    dp.register_message_handler(process_pass, state=SignInState.password)
