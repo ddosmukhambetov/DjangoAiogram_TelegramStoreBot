@@ -27,6 +27,8 @@ class Product(models.Model):
     updated_at = models.DateTimeField(verbose_name='Время редактирования', auto_now=True)
     is_published = models.BooleanField(verbose_name='Опубликован', default=True)
     product_category = models.ForeignKey(verbose_name='Категория', to='Category', on_delete=models.PROTECT)
+    product_subcategory = models.ForeignKey(verbose_name='Подкатегория', to='SubCategory', on_delete=models.PROTECT,
+                                            null=True)
 
     def __str__(self):
         return self.name
@@ -50,4 +52,21 @@ class Category(models.Model):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
         db_table = 'categories'
+        ordering = ['-created_at']
+
+
+class SubCategory(models.Model):
+    name = models.CharField(verbose_name='Название подкатегории', max_length=100)
+    description = models.TextField(verbose_name='Описание подкатегории', blank=True)
+    created_at = models.DateTimeField(verbose_name='Время создания подкатегории', auto_now_add=True)
+    subcategory_category = models.ForeignKey(verbose_name='Категория', to='Category', on_delete=models.PROTECT,
+                                             null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = 'Подкатегория'
+        verbose_name_plural = 'Подкатегории'
+        db_table = 'subcategories'
         ordering = ['-created_at']
