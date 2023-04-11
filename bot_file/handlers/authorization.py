@@ -9,7 +9,7 @@ from aiogram.dispatcher import FSMContext
 from ..models import TelegramUser
 from ..states import AuthState, SignInState, ForgotPasswordState
 from ..keyboards import sign_inup_kb
-from ..keyboards.registration_kb import markup
+from ..keyboards.registration_kb import markup, markup_cancel_forgot_password
 from ..keyboards import default_kb
 
 new_user = {}
@@ -112,7 +112,7 @@ async def process_sign_in(message: types.Message, state: FSMContext):
         async with state.proxy() as sign_in_data:
             sign_in_data['login'] = message.text
             sign_in['login'] = sign_in_data['login']
-        await message.answer("Теперь тебе нужно ввести пароль 🔐", reply_markup=markup)
+        await message.answer("Теперь тебе нужно ввести пароль 🔐", reply_markup=markup_cancel_forgot_password)
         await SignInState.password.set()
     else:
         await message.answer("Такого логина <b>нет</b>, повторите еще раз ❌", reply_markup=markup)
@@ -129,7 +129,8 @@ async def process_pass(message: types.Message, state: FSMContext):
             await message.answer("Вход был <b>успешно</b> выполнен ⭐️", reply_markup=default_kb.markup)
             await state.finish()
         else:
-            await message.answer("Пароль <b>не правильный</b> попробуйте еще раз 🔄", reply_markup=markup)
+            await message.answer("Пароль <b>не правильный</b> попробуйте еще раз 🔄",
+                                 reply_markup=markup_cancel_forgot_password)
             await SignInState.password.set()
 
 
