@@ -21,4 +21,4 @@ class TelegramUserAdmin(admin.ModelAdmin):
     list_display = ['id', 'user_login', 'registered_at', 'is_registered']
     list_display_links = ['id', 'user_login']
     search_fields = ['id', 'user_login', 'registered_at']
-    readonly_fields = ['user_password']
+    readonly_fields = ['user_password', 'is_registered']
