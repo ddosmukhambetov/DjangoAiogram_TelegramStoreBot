@@ -1,6 +1,8 @@
 aiogram==2.25.1
+asgiref==3.6.0
+django-smart-selects==1.6.0
 Django==4.2
 environs==9.5.0
 Pillow==9.4.0
+pip==23.0.1
 psycopg2==2.9.5
-asgiref==3.6.0
