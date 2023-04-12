@@ -10,6 +10,7 @@ from .authorization import sign_in
 from ..keyboards.default_kb import markup
 
 
+# Сделан хендлер показа категории -> подкатегории -> товаров
 # @dp.message_handler(Text(equals='Каталог 🛒'))
 async def show_categories(message: types.Message):
     if sign_in['current_state']:

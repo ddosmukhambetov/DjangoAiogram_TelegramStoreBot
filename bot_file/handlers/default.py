@@ -23,6 +23,7 @@ HELP_TEXT = """
 """
 
 
+# Сделан дефолтный хендлер
 # @dp.message_handler(commands='start')
 async def cmd_start(message: types.Message):
     try:

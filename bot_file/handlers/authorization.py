@@ -12,6 +12,8 @@ from ..keyboards import sign_inup_kb
 from ..keyboards.registration_kb import markup, markup_cancel_forgot_password
 from ..keyboards import default_kb
 
+
+# Сделан хендлер авторизации
 new_user = {}
 sign_in = {'current_state': False}
 update_data = {}
