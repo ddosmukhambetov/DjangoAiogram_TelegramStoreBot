@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
+# Реализована клавиатура входа
 markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=False)
 btn_1 = KeyboardButton('Регистрация ✌️')
 btn_2 = KeyboardButton('Войти 👋')
