@@ -23,7 +23,7 @@ async def show_categories(message: types.Message):
 async def get_products(query):
     elem = query.data.split(':')
     if await subcategory_products_exists(product_subcategory_id=elem[1]):
-        await bot.send_message(chat_id=query.message.chat.id, text="Список товаров которые есть в этой категории 👇 ")
+        await bot.send_message(chat_id=query.message.chat.id, text="Список товаров которые есть в этой подкатегории 👇 ")
         async for product in Product.objects.filter(product_subcategory_id=elem[1]):
             photo_id = product.photo.open('rb').read()
             text = f"Товар 🚀: {product.name}\n\n" \
