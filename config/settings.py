@@ -14,8 +14,10 @@ from pathlib import Path
 from environs import Env
 
 
+# Берем TOKEN_API бота, ID администраора телеграмм бота, и секретный ключ Django с .env файла
 env = Env()
 env.read_env()
+
 TOKEN_API = env.str('TOKEN_API')
 ADMIN_ID = env.int('ADMIN_ID')
 
@@ -46,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # Добавляем наше приложение
     'bot_file.apps.BotFileConfig',
     'smart_selects',
 ]
@@ -85,6 +88,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# Подключаем базу данных, в нашем случае это PostgreSQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -133,6 +137,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Добавляем MEDIA_URL, MEDIA_ROOT для работы и изображениями
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
