@@ -17,6 +17,7 @@ from environs import Env
 env = Env()
 env.read_env()
 TOKEN_API = env.str('TOKEN_API')
+ADMIN_ID = env.int('ADMIN_ID')
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env.str('SECRET_KEY')
@@ -46,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'bot_file.apps.BotFileConfig',
+    'smart_selects',
 ]
 
 MIDDLEWARE = [
