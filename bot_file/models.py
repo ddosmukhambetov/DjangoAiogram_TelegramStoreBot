@@ -69,7 +69,8 @@ class Product(models.Model):
         chained_field='product_category',
         chained_model_field='subcategory_category',
         show_all=False,
-        auto_choose=True
+        auto_choose=True,
+        null=True
     )
 
     def __str__(self):
