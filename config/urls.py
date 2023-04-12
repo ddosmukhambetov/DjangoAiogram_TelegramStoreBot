@@ -20,9 +20,12 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Подключаем наш urls приложения
     path('', include('bot_file.urls'))
 ]
 
 
+# В режиме DEBUG, для работы и изображениями
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
