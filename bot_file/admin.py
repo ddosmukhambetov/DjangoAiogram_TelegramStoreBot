@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Product, Category, TelegramUser, SubCategory
 
 
+# Регистрируем модели нашего приложения в Django админке
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'price', 'created_at', 'product_category', 'product_subcategory', 'is_published']
