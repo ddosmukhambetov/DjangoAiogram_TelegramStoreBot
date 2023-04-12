@@ -9,6 +9,7 @@ async def on_startup(_):
     print("Bot has been successfully launched!")
 
 
+# Запуск бота, обязательно management -> commands -> название -> создание класса Command(BaseCommand)
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
