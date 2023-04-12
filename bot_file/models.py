@@ -2,6 +2,7 @@ from django.db import models
 from smart_selects.db_fields import ChainedForeignKey
 
 
+# Создаем модели нашего приложения
 class TelegramUser(models.Model):
     chat_id = models.IntegerField(verbose_name='ID пользователя', unique=True, null=True)
     user_login = models.CharField(verbose_name='Логин', max_length=255, unique=True)
@@ -60,6 +61,9 @@ class Product(models.Model):
     updated_at = models.DateTimeField(verbose_name='Время редактирования', auto_now=True)
     is_published = models.BooleanField(verbose_name='Опубликован', default=True)
     product_category = models.ForeignKey(verbose_name='Категория', to='Category', on_delete=models.PROTECT, null=True)
+
+    # ChainedForeignKey Для работы с зависимыми полями (наша подкатегория зависима от категории). Smart Selects
+    # Документация django-smart-selects https://django-smart-selects.readthedocs.io/en/latest/
     product_subcategory = ChainedForeignKey(
         to=SubCategory,
         chained_field='product_category',
