@@ -43,7 +43,7 @@ async def cmd_start(message: types.Message):
 
 # @dp.message_handler(Text(equals='Помощь ⭐️'))
 async def cmd_help(message: types.Message):
-    await bot.send_message(chat_id=message.chat.id, text=HELP_TEXT)
+    await bot.send_message(chat_id=message.chat.id, text=HELP_TEXT, reply_markup=default_kb.markup)
 
 
 # @dp.message_handler(Text(equals='Описание 📌'))
