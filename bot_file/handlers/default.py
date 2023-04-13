@@ -63,7 +63,7 @@ async def cmd_description(message: types.Message):
 async def send_all(message: types.Message):
     if sign_in['current_state']:
         if message.chat.id == settings.ADMIN_ID:
-            await message.answer(f"Сообщение <b>{message.text[message.text.find(' '):]}</b> отправляется")
+            await message.answer(f"Сообщение: <b>{message.text[message.text.find(' '):]}</b> отправляется")
             async for user in TelegramUser.objects.filter(is_registered=True):
                 await bot.send_message(chat_id=user.chat_id, text=message.text[message.text.find(' '):])
             await message.answer("Все успешно отправлено!")
