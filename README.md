@@ -38,5 +38,15 @@ ___________
 **`python manage.py makemigrations`**
 **`python manage.py migrate`**
 **`python manage.py createsuperuser`**
+
+### 4. Запуск бота
+- **Чтобы запустить Django напишитите** **`python manage.py runserver`**
+- **Чтобы запустить телеграмм бота напишите** **`python manage.py runserver`**
 ___________
 ## Телеграмм бот
+- **В боте есть такие команды как**
+**`Регистрация, Вход, Забыли пароль, Помощь, Описание, Каталог и Меню Администратора и т.д.`**
+### 1. Регистраци, Вход, Забыли пароль
+<p><img src="https://i.ibb.co/wYq9bWp/Group-1-1.png", alt="authentification"></p>
+
+- **Так же один пользователь может регистрироваться с одного устройства один раз**
