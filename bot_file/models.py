@@ -14,8 +14,8 @@ class TelegramUser(models.Model):
         return self.user_login
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = 'Телеграмм Пользователь'
+        verbose_name_plural = 'Телеграмм Пользователи'
         db_table = 'telegram_users'
         ordering = ['-registered_at']
 
@@ -70,7 +70,8 @@ class Product(models.Model):
         chained_model_field='subcategory_category',
         show_all=False,
         auto_choose=True,
-        null=True
+        null=True,
+        verbose_name='Подкатегория'
     )
 
     def __str__(self):
