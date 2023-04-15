@@ -14,7 +14,7 @@ from pathlib import Path
 from environs import Env
 
 
-# Берем TOKEN_API бота, ID администраора телеграмм бота, и секретный ключ Django с .env.example файла
+# Берем TOKEN_API бота, ID администраора телеграмм бота, и секретный ключ Django с .env файла
 env = Env()
 env.read_env()
 
