@@ -4,7 +4,7 @@ from asgiref.sync import sync_to_async
 from ..loader import bot, dp
 from ..keyboards.catalog_ikb import get_categories, get_subcategories, category_cb, subcategory_cb
 from ..keyboards import sign_inup_kb
-from ..models import Product, SubCategory
+from ..models import Product, SubCategory, Category
 from aiogram.dispatcher.filters import Text
 from .authorization import sign_in
 from ..keyboards.default_kb import markup
@@ -14,8 +14,13 @@ from ..keyboards.default_kb import markup
 # @dp.message_handler(Text(equals='Каталог 🛒'))
 async def show_categories(message: types.Message):
     if sign_in['current_state']:
-        await bot.send_message(chat_id=message.chat.id, text="Выберите категорию из списка 📂",
-                               reply_markup=await get_categories())
+        if await category_exists():
+            await bot.send_message(chat_id=message.chat.id, text="Выберите категорию из списка 📂",
+                                   reply_markup=await get_categories())
+        else:
+            await bot.send_message(chat_id=message.chat.id, text="К сожалению администратор пока что "
+                                                                 "не добавил категории ☹️",
+                                   reply_markup=markup)
     else:
         await message.answer("Вы не вошли в аккаунт, попробуйте войти в профиль ‼️",
                              reply_markup=sign_inup_kb.markup)
@@ -46,8 +51,7 @@ async def show_subcategories(query: types.CallbackQuery):
                                    reply_markup=await get_subcategories(elem[1]))
         else:
             await bot.send_message(chat_id=query.message.chat.id,
-                                   text="Простите, но в этой категории нету подкатегории,"
-                                        "а значит нет товаров 😔", reply_markup=markup)
+                                   text="Простите, но в этой категории нет товаров 😔", reply_markup=markup)
     else:
         await bot.send_message(chat_id=query.message.chat.id,
                                text="Вы не вошли в аккаунт, попробуйте войти в профиль ‼️",
@@ -73,6 +77,11 @@ def subcategory_products_exists(product_subcategory_id):
 @sync_to_async
 def category_subcategory_exists(subcategory_category_id):
     return SubCategory.objects.filter(subcategory_category_id=subcategory_category_id).exists()
+
+
+@sync_to_async
+def category_exists():
+    return Category.objects.all().exists()
 
 
 def catalog_handlers_register():
