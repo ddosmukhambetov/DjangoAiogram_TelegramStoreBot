@@ -24,13 +24,8 @@ ___________
 `pip install -r requirements.txt`
 
 ### 2. Поменять базу данных, TOKEN_API телеграмм бота, ID администратора телеграмм бота, SECRET_KEY Django
-- Поменяйте базу данных в `django_aiogram/config/settings/`
-<p align="left"><img src="https://i.ibb.co/60CZ8yP/db.png", alt="Change DB"></p>
-
 - Переименуйте файл `.env.example` на `.env`
-- Измените TOKEN_ID, SECRET_KEY, ADMIN_ID в `django_aiogram/bot_file/.env/`
-
-<p align="left"><img src="https://i.ibb.co/6YrGx1M/2023-04-13-011719.png", alt="Change TOKEN_API, ADMIN_ID, SECRET_KEY"></p>
+- Измените TOKEN_ID, SECRET_KEY, ADMIN_ID, PG_NAME, PG_USER, PG_PASSWORD, PG_HOST, PG_PORT внутри `django_aiogram/bot_file/.env/`
 
 ### 3. Сделайте миграции
 - Перейдите сюда `cd django_aiogram/`

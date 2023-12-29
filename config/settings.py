@@ -92,11 +92,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'DatabaseName',
-        'USER': 'UserName',
-        'PASSWORD': 'Password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': env.str('PG_NAME'),
+        'USER': env.str('PG_USER'),
+        'PASSWORD': env.str('PG_PASSWORD'),
+        'HOST': env.str('PG_HOST', default='localhost'),
+        'PORT': env.str('PG_PORT', default=5432),
     }
 }
 
